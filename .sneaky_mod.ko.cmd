@@ -1,0 +1,1 @@
+cmd_/home/cl583/homework5-kit/sneaky_mod.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/cl583/homework5-kit/sneaky_mod.ko /home/cl583/homework5-kit/sneaky_mod.o /home/cl583/homework5-kit/sneaky_mod.mod.o;  true
