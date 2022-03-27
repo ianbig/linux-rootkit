@@ -29,6 +29,7 @@ __used __section(__versions) = {
 	{ 0xc5850110, "printk" },
 	{ 0xdecd0b29, "__stack_chk_fail" },
 	{ 0x8b9200fd, "lookup_address" },
+	{ 0xb0e602eb, "memmove" },
 	{ 0x2ea2c95c, "__x86_indirect_thunk_rax" },
 	{ 0xbdfb6dbb, "__fentry__" },
 };
@@ -36,4 +37,4 @@ __used __section(__versions) = {
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "0FE32E158AE3964ED7429D3");
+MODULE_INFO(srcversion, "F6DF13291C81C89600BDC2B");

