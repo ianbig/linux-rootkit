@@ -1,2 +1,2 @@
-/home/cl583/homework5-kit/sneaky_mod.o
+/home/cl583/linux-rootkit/sneaky_mod.o
 
