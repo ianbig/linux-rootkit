@@ -30,7 +30,7 @@ void load_module() {
   setupPasswd();
   // pass in process id
   pid_t pid = getpid();
-  printf("sneaky process with pid %d\n", (int)pid);
+  printf("sneaky_process pid = %d\n", (int)pid);
   char system_str[INPUT_STR_SIZE] = {0};
   packSystemString(system_str, pid);
   // load module
